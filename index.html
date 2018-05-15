@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <canvas id="drawing" width="600" height="400">A drawing of someing!</canvas>
+    <script type="text/javascript">
+        var drawCircle = function(data, canvas, options){
+            var defaultOptions = {
+                legend: {
+                    position: 'right',
+                    font: {
+                      weight: 'bold',
+                      size: 20,
+                      family: 'Arial'
+                    }
+                },
+                title: {
+                    text: 'Pie Chart',
+                    font: {
+                      weight: 'bold',
+                      size: 20,
+                      family: 'Arial'
+                    }
+                },
+                tooltip: {
+                    template: '<div>Year: {{label}}</div><div>Production: {{data}}</div>',
+                    font: {
+                      weight: 'bold',
+                      size: 20,
+                      family: 'Arial'
+                    }
+                }
+            }
+
+            if(canvas.getContext) {
+              var ctx = canvas.getContext("2d");
+              var width = canvas.width,
+                height = canvas.height,
+                op = generateOptions(options, defaultOptions),
+                title_text = op.title.text, title_height = op.title.font.size,
+                title_position = {};
+              ctx.font = op.title.font.weight + " " + op.title.font.size+"px " + op.title.font.family;
+              title_width = ctx.measureText(title_text).width;
+              title_position .x = (width - title_width)/2;
+              title_position.y = 20 + op.title.font.size;
+              title_width = ctx.measureText(title_text).width, title_height = op.title.font.size;
+              ctx.fillText(title_text, title_position.x, title_position.y);
+
+              var radius = (height - title_height - title_position.y - 20) / 2 ;
+              var center = {
+                x: radius + 20,
+                y: radius + 30 + title_position.y
+              };
+              var legend_width = op.legend.font.size * 2.5,
+                  legend_height = op.legend.font.size * 1.2, //图例宽高
+                  legend_posX = center.x * 2 +20,
+                  legend_posY = 80,
+                  legend_textX = legend_posX + legend_width + 5, legend_textY = legend_posY + op.legend.font.size * 0.9;
+              var startAngle = 0, endAngle = 0;//起始、结束弧度
+                ctx.strokeStyle = 'grey';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+                var data_c = calculateData(data);
+                for(var i=0, len=data_c.length; i<len; i++) {
+                    //绘制饼图
+                    endAngle += data_c[i].portion * 2*Math.PI;
+                    ctx.fillStyle = data_c[i].color;
+                    ctx.beginPath();
+                    ctx.moveTo(center.x, center.y);
+                    ctx.arc(center.x, center.y, radius, startAngle, endAngle, false);
+                    ctx.closePath();
+                    ctx.fill();
+                    startAngle = endAngle;
+                    //绘制图例
+                    ctx.fillRect(legend_posX, legend_posY + (10 + legend_height) * i, legend_width, legend_height);
+                    // ctx.moveTo(posX, posY + (10 + height) * i);
+                    ctx.font = 'bold 12px Arial';
+                    var percent = data_c[i].label + ' : ' + (data_c[i].portion*100).toFixed(2) + '%';
+                    ctx.fillText(percent, legend_textX, legend_textY + (10 + legend_height) * i);
+                }
+
+            }
+        };
+
+        function mergeJSON(source1,source2){
+          var mergedJSON = JSON.parse(JSON.stringify(source2));
+          for (var attrname in source1) {
+            if(mergedJSON.hasOwnProperty(attrname)) {
+              if ( source1[attrname]!=null && source1[attrname].constructor==Object ) {
+                mergedJSON[attrname] = mergeJSON(source1[attrname], mergedJSON[attrname]);
+              }
+            } else {
+              mergedJSON[attrname] = source1[attrname];
+            }
+          }
+          return mergedJSON;
+        }
+
+        function generateOptions(givenOptions, defaultOptions) {
+          return mergeJSON(defaultOptions, givenOptions);
+        }
+        function calculateData(data) {
+          if(data instanceof Array) {
+            var sum = data.reduce(function(a, b) {
+              return a + b.data;
+            }, 0);
+            var map = data.map(function(a) {
+              return {
+                label: a.label,
+                data: a.data,
+                color: a.color,
+                portion: a.data/sum
+              }
+            });
+            return map;
+          }
+        }
+
+        var init = function(){
+            var data = [
+              { data: 20, color: "grey", label: "2017" },
+              { data: 30, color: "red", label: "2018" },
+              { data: 10, color: "black", label: "2010"}
+            ];
+            var options = {
+                title: {
+                    text: 'Production By Year',
+                    font: {
+                      size: 30
+                    }
+                },
+                tooltip: {
+                    template: '<div>Year: {{label}}</div><div>Production: {{data}}</div>',
+                    font: {
+                      family: "Arial"
+                    }
+                }
+            }
+            drawCircle(data, document.getElementById("drawing"), options);
+        };
+
+        init();
+
+    </script>
+</body>
+</html>
