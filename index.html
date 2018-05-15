@@ -53,17 +53,16 @@
                 y: radius + 30 + title_position.y
               };
               var legend_width = op.legend.font.size * 2.5,
-                  legend_height = op.legend.font.size * 1.2, //图例宽高
+                  legend_height = op.legend.font.size * 1.2,
                   legend_posX = center.x * 2 +20,
                   legend_posY = 80,
                   legend_textX = legend_posX + legend_width + 5, legend_textY = legend_posY + op.legend.font.size * 0.9;
-              var startAngle = 0, endAngle = 0;//起始、结束弧度
+              var startAngle = 0, endAngle = 0;
                 ctx.strokeStyle = 'grey';
                 ctx.lineWidth = 3;
                 ctx.strokeRect(0, 0, canvas.width, canvas.height);
                 var data_c = calculateData(data);
                 for(var i=0, len=data_c.length; i<len; i++) {
-                    //绘制饼图
                     endAngle += data_c[i].portion * 2*Math.PI;
                     ctx.fillStyle = data_c[i].color;
                     ctx.beginPath();
@@ -72,9 +71,7 @@
                     ctx.closePath();
                     ctx.fill();
                     startAngle = endAngle;
-                    //绘制图例
                     ctx.fillRect(legend_posX, legend_posY + (10 + legend_height) * i, legend_width, legend_height);
-                    // ctx.moveTo(posX, posY + (10 + height) * i);
                     ctx.font = 'bold 12px Arial';
                     var percent = data_c[i].label + ' : ' + (data_c[i].portion*100).toFixed(2) + '%';
                     ctx.fillText(percent, legend_textX, legend_textY + (10 + legend_height) * i);
